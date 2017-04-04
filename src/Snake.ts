@@ -18,15 +18,34 @@ export class Snake extends Laya.Sprite {
 	targetAngle: number = this.angle;
 	angleVelocity: number = ANGLE_VELOCITY;		
 
-	constructor() {
+	gameScene: GameScene;
+	baseZ: number;
+	bodies: Body[] = [];
+	lastPos: Laya.Point = new Laya.Point();
+
+	constructor(scene: GameScene, baseZ: number, x: number, y: number) {
 		super();
 
-		this.graphics.drawCircle(0, 0, 15, "#FF0000");
+		this.gameScene = scene;
+		this.baseZ = baseZ;
+		this.pos(x, y);
+
+		this.addBody(Laya.Pool.getItemByClass("snake_head", Head));
+		this.addBody(Laya.Pool.getItemByClass("snake_body", Body));
+		this.addBody(Laya.Pool.getItemByClass("snake_body", Body));
+		this.addBody(Laya.Pool.getItemByClass("snake_body", Body));
+		this.addBody(Laya.Pool.getItemByClass("snake_body", Body));
 
 		this.calcVelocity();
 
 		this.frameLoop(1, this, this.update);
 		this.on("change_dir", this, this.onDirChanged);
+	}
+
+	addBody(body: Body) {
+		body.zOrder = this.baseZ -this.bodies.length;
+		this.bodies.push(body);
+		this.gameScene.addChild(body);
 	}
 
 	onDirChanged(radians: number) {
@@ -55,7 +74,6 @@ export class Snake extends Laya.Sprite {
 
 	update() {
 		if (this.angle != this.targetAngle) {
-			console.log("XX-> " + this.angle + ", " + this.targetAngle + ", " + this.angleVelocity);
 			if (Math.abs(this.angle - this.targetAngle) <= Math.abs(this.angleVelocity))
 				this.angle = this.targetAngle;
 			else {
@@ -69,6 +87,75 @@ export class Snake extends Laya.Sprite {
 		}
 		this.x += this.vx;
 		this.y += this.vy;
+
+		this.updateBodies();
+	}
+
+	updateBodies() {
+		this.bodies[0].updatePos(this);
+		for (let i = 1; i < this.bodies.length; ++i) {
+			this.bodies[i].updatePos(this.bodies[i - 1]);
+		}
+	}
+
+	getLastPoint() {
+		return this.lastPos.setTo(this.x, this.y);
+	}
+}
+
+const MAX_HISTORY = 10;
+
+class Body extends Laya.Sprite {
+	
+	historyPos: Laya.Point[] = [];
+	historyPosIdx: number = -1;
+
+	constructor() {
+		super();
+
+		this.graphics.drawCircle(0, 0, 15, "#0000FF");
+	}
+
+
+	updatePos(p: {getLastPoint():Laya.Point}) {
+		let lp = p.getLastPoint();
+		if (lp) {
+			if (this.historyPos.length < MAX_HISTORY) {
+				let point:Laya.Point = Laya.Pool.getItemByClass("point", Laya.Point);
+				this.historyPos.push(point.setTo(lp.x, lp.y));
+				this.historyPosIdx = this.historyPos.length;
+				if (this.historyPosIdx == MAX_HISTORY)
+					this.historyPosIdx = 0;
+			}
+			else {
+				this.historyPos[this.historyPosIdx].setTo(lp.x, lp.y);
+				this.historyPosIdx++;
+				if (this.historyPosIdx == this.historyPos.length)
+					this.historyPosIdx = 0;
+			}
+			this.pos(lp.x, lp.y, true);
+		}
+	}
+
+	getLastPoint(): Laya.Point {
+		if (this.historyPos.length == 0)
+			return null;
+
+		if (this.historyPos.length < MAX_HISTORY) {
+			return this.historyPos[0];
+		}
+				
+		return this.historyPos[this.historyPosIdx];
+	}
+}
+
+class Head extends Body {
+
+	constructor() {
+		super();
+
+		this.graphics.clear();
+		this.graphics.drawCircle(0, 0, 15, "#FF0000");
 	}
 }
 
