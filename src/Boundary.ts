@@ -5,16 +5,13 @@ module com.test {
 
 export class Boundary extends Laya.Sprite {
 
-	constructor(size: number) {
+	constructor(width: number, height: number) {
 		super();
-
-		let width = size;
-		let height = size;
 
 		this.size(width, height);
 
 		// draw background rect
-		this.graphics.drawRect(-width / 2, -height / 2, width, height, "#FFFFFF");
+		this.graphics.drawRect(0, 0, width, height, "#FFFFFF");
 
 		let cols = 20;
 		let rows = 20;
@@ -22,8 +19,8 @@ export class Boundary extends Laya.Sprite {
 		let rowHeight = height / rows;
 
 		// draw grids
-		let startX = -width / 2;
-		let startY = -height / 2;
+		let startX = 0;
+		let startY = 0;
 		let endX = startX;
 		let endY = startY + height;
 		for (let c = 0; c <= cols; ++c) {
@@ -33,8 +30,8 @@ export class Boundary extends Laya.Sprite {
 			let toY = endY;
 			this.graphics.drawLine(fromX, fromY, toX, toY, "#666666", 1);
 		}
-		startX = -width / 2;
-		startY = -height / 2;
+		startX = 0;
+		startY = 0;
 		endX = startX + width;
 		endY = startY;
 		for (let r = 0; r <= rows; ++r) {

@@ -28,8 +28,7 @@ export class GameMain {
         let stageHeight = Laya.stage.height;
         console.log("stage size: " + stageWidth + ", " + stageHeight);
         console.log("client size: " + Laya.Browser.clientWidth + ", " + Laya.Browser.clientHeight);
-        let gameScene = new GameScene(stageWidth, stageHeight);
-        Laya.stage.addChild(gameScene);
+        Laya.stage.addChild(new GameScene());
     }
 }
 

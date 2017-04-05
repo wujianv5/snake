@@ -6,7 +6,7 @@ module com.test {
 const _PI = Math.PI;
 const _2PI = _PI * 2;
 const _PI_2 = _PI / 2;
-const ANGLE_VELOCITY = _PI_2 / 10;	// 90 degrees per 20 frames
+const ANGLE_VELOCITY = _PI_2 / 10;	// 90 degrees per frames
 const INIT_LENGTH = 5;
 const HEAD_POOL_SIGN = "snake_head";
 const BODY_POOL_SIGN = "snake_body";
@@ -35,13 +35,17 @@ export class Snake extends Laya.Sprite {
 
 		this.addBody(Laya.Pool.getItemByClass(HEAD_POOL_SIGN, Head));
 		for (let i = 0; i < INIT_LENGTH - 1; ++i) {
-			this.addBody(Laya.Pool.getItemByClass(BODY_POOL_SIGN, Body));
+			this.addBody(this.newBody());
 		}
 
 		this.reset(x, y);
 
 		this.frameLoop(1, this, this.update);
 		this.on("change_dir", this, this.onDirChanged);
+	}
+
+	newBody() : Body {
+		return Laya.Pool.getItemByClass(BODY_POOL_SIGN, Body);
 	}
 
 	addBody(body: Body) {
@@ -125,6 +129,7 @@ export class Snake extends Laya.Sprite {
 		while (this.bodies.length > INIT_LENGTH) {
 			let body = this.bodies.pop();
 			Laya.Pool.recover(BODY_POOL_SIGN, body);
+			body.removeSelf();
 		}
 		for (let i = 0; i < this.bodies.length; ++i) {
 			let body = this.bodies[i];
