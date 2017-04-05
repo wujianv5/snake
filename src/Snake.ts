@@ -12,20 +12,24 @@ const HEAD_POOL_SIGN = "snake_head";
 const BODY_POOL_SIGN = "snake_body";
 const POINT_POOL_SIGN = "point";
 
+const SNAKE_TEXTURE_MATRIX = new laya.maths.Matrix();
+SNAKE_TEXTURE_MATRIX.rotate(_PI_2);
+
 export class Snake extends Laya.Sprite {
 
-	readonly velocity: number = 3;
+	readonly velocity: number = 4;
 	vx: number = 0;
 	vy: number = -this.velocity;
 
 	angle: number = _2PI * 3 / 4;
 	targetAngle: number = this.angle;
 	angleVelocity: number = ANGLE_VELOCITY;
+	angleDegrees: number = this.angle * 180 / _PI;
 
 	gameScene: GameScene;
 	baseZ: number;
 	bodies: Body[] = [];
-	lastPos: Laya.Point = new Laya.Point();
+	lastPos: HistoryPos = new HistoryPos();
 
 	constructor(scene: GameScene, baseZ: number, x: number, y: number) {
 		super();
@@ -94,6 +98,7 @@ export class Snake extends Laya.Sprite {
 					this.angle -= _2PI;
 			}
 			this.calcVelocity();
+			this.angleDegrees = this.angle * 180 / _PI;
 		}
 		this.x += this.vx;
 		this.y += this.vy;
@@ -108,8 +113,8 @@ export class Snake extends Laya.Sprite {
 		}
 	}
 
-	getLastPoint() {
-		return this.lastPos.setTo(this.x, this.y);
+	getLastPos(): HistoryPos {
+		return this.lastPos.set(this.x, this.y, this.angleDegrees);
 	}
 
 	getHeadRadius() {
@@ -123,6 +128,7 @@ export class Snake extends Laya.Sprite {
 		this.angle = _2PI * 3 / 4;
 		this.targetAngle = this.angle;
 		this.angleVelocity = ANGLE_VELOCITY;
+		this.angleDegrees = this.angle * 180 / _PI;
 
 		this.calcVelocity();
 
@@ -141,40 +147,64 @@ export class Snake extends Laya.Sprite {
 
 const MAX_HISTORY = 8;
 
+class HistoryPos {
+	x: number;
+	y: number;
+	r: number;	// rotation in degrees
+	set(x:number, y:number, r:number) {
+		this.x = x;
+		this.y = y;
+		this.r = r;
+		return this;
+	}
+}
+
 class Body extends Laya.Sprite {
 	
-	historyPos: Laya.Point[] = [];
+	historyPos: HistoryPos[] = [];
 	historyPosIdx: number = -1;
-	readonly radius: number = 15;
+	protected _radius: number = 15;
 
 	constructor() {
 		super();
 
-		this.graphics.drawCircle(0, 0, this.radius, "#0000FF");
+		this.setupLooking();		
 	}
 
+	get radius(): number {
+		return this._radius;
+	}
 
-	updatePos(p: {getLastPoint():Laya.Point}) {
-		let lp = p.getLastPoint();
+	setupLooking() {
+		let texture: Laya.Texture = Laya.Loader.getRes("game/skin_1_body.png");
+		this.size(texture.width, texture.height);
+		this.graphics.drawTexture(texture, -texture.width / 2, -texture.height / 2, texture.width, texture.height, SNAKE_TEXTURE_MATRIX);
+		this._radius = Math.min(texture.width, texture.height) / 2;
+		
+	}
+
+	updatePos(p: {getLastPos():HistoryPos}) {
+		let lp = p.getLastPos();
 		if (lp) {
 			if (this.historyPos.length < MAX_HISTORY) {
-				let point:Laya.Point = Laya.Pool.getItemByClass(POINT_POOL_SIGN, Laya.Point);
-				this.historyPos.push(point.setTo(lp.x, lp.y));
+				let pos:HistoryPos = Laya.Pool.getItemByClass(POINT_POOL_SIGN, HistoryPos);
+				this.historyPos.push(pos.set(lp.x, lp.y, lp.r));
 				this.historyPosIdx = this.historyPos.length;
 				if (this.historyPosIdx == MAX_HISTORY)
 					this.historyPosIdx = 0;
 			}
 			else {
-				this.historyPos[this.historyPosIdx].setTo(lp.x, lp.y);
+				this.historyPos[this.historyPosIdx].set(lp.x, lp.y, lp.r);
 				this.historyPosIdx++;
 				if (this.historyPosIdx == this.historyPos.length)
 					this.historyPosIdx = 0;
 			}
 			this.pos(lp.x, lp.y, true);
+			this.rotation = lp.r;
 		}
 	}
 
-	getLastPoint(): Laya.Point {
+	getLastPos(): HistoryPos {
 		if (this.historyPos.length == 0)
 			return null;
 
@@ -187,8 +217,8 @@ class Body extends Laya.Sprite {
 
 	reset() {
 		while (this.historyPos.length > 0) {
-			let point = this.historyPos.pop();
-			Laya.Pool.recover(POINT_POOL_SIGN, point);
+			let pos = this.historyPos.pop();
+			Laya.Pool.recover(POINT_POOL_SIGN, pos);
 		}
 		this.historyPosIdx = -1;
 	}
@@ -198,9 +228,14 @@ class Head extends Body {
 
 	constructor() {
 		super();
+	}
 
-		this.graphics.clear();
-		this.graphics.drawCircle(0, 0, 15, "#FF0000");
+	setupLooking() {
+		let texture: Laya.Texture = Laya.Loader.getRes("game/skin_1_head.png");
+		this.size(texture.width, texture.height);
+		
+		this.graphics.drawTexture(texture, -texture.width / 2, -texture.height / 2, texture.width, texture.height, SNAKE_TEXTURE_MATRIX);
+		this._radius = Math.min(texture.width, texture.height) / 2;
 	}
 }
 

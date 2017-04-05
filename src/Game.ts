@@ -7,7 +7,7 @@ export class GameMain {
     inited: boolean = false;
 
     constructor() {
-        Laya.init(600, 400, Laya.WebGL);
+        Laya.init(720, 400, Laya.WebGL);
         Laya.stage.scaleMode="fixedwidth";
         Laya.stage.screenMode = "vertical"
         Laya.stage.on(Laya.Event.RESIZE, this, this.onResize);
@@ -19,8 +19,15 @@ export class GameMain {
         if (!this.inited) {
             this.inited = true;
             Laya.stage.bgColor = "#EEEEEE";
-            this.initGameScene();
+            Laya.loader.load("res/atlas/game.json", Laya.Handler.create(this, this.onLoaded), null, Laya.Loader.ATLAS)
         }
+    }
+
+    onLoaded() {
+        console.log(Laya.Loader.loadedMap);
+        for (var i in Laya.Loader.loadedMap) 
+            console.log(i + " -> " + Laya.Loader.loadedMap[i]);
+        this.initGameScene();
     }
 
     initGameScene() {
