@@ -6,17 +6,21 @@ module com.test {
 const _PI = Math.PI;
 const _2PI = _PI * 2;
 const _PI_2 = _PI / 2;
-const ANGLE_VELOCITY = _PI_2 / 20;	// 90 degrees per 20 frames
+const ANGLE_VELOCITY = _PI_2 / 10;	// 90 degrees per 20 frames
+const INIT_LENGTH = 5;
+const HEAD_POOL_SIGN = "snake_head";
+const BODY_POOL_SIGN = "snake_body";
+const POINT_POOL_SIGN = "point";
 
 export class Snake extends Laya.Sprite {
 
-	velocity: number = 2;
+	readonly velocity: number = 3;
 	vx: number = 0;
 	vy: number = -this.velocity;
 
 	angle: number = _2PI * 3 / 4;
 	targetAngle: number = this.angle;
-	angleVelocity: number = ANGLE_VELOCITY;		
+	angleVelocity: number = ANGLE_VELOCITY;
 
 	gameScene: GameScene;
 	baseZ: number;
@@ -28,15 +32,13 @@ export class Snake extends Laya.Sprite {
 
 		this.gameScene = scene;
 		this.baseZ = baseZ;
-		this.pos(x, y);
 
-		this.addBody(Laya.Pool.getItemByClass("snake_head", Head));
-		this.addBody(Laya.Pool.getItemByClass("snake_body", Body));
-		this.addBody(Laya.Pool.getItemByClass("snake_body", Body));
-		this.addBody(Laya.Pool.getItemByClass("snake_body", Body));
-		this.addBody(Laya.Pool.getItemByClass("snake_body", Body));
+		this.addBody(Laya.Pool.getItemByClass(HEAD_POOL_SIGN, Head));
+		for (let i = 0; i < INIT_LENGTH - 1; ++i) {
+			this.addBody(Laya.Pool.getItemByClass(BODY_POOL_SIGN, Body));
+		}
 
-		this.calcVelocity();
+		this.reset(x, y);
 
 		this.frameLoop(1, this, this.update);
 		this.on("change_dir", this, this.onDirChanged);
@@ -44,8 +46,12 @@ export class Snake extends Laya.Sprite {
 
 	addBody(body: Body) {
 		body.zOrder = this.baseZ -this.bodies.length;
+		if (this.bodies.length > 0) {
+			let last = this.bodies[this.bodies.length - 1];
+			body.pos(last.x, last.y);
+		}
 		this.bodies.push(body);
-		this.gameScene.addChild(body);
+		this.gameScene.playGround.addChild(body);
 	}
 
 	onDirChanged(radians: number) {
@@ -101,19 +107,45 @@ export class Snake extends Laya.Sprite {
 	getLastPoint() {
 		return this.lastPos.setTo(this.x, this.y);
 	}
+
+	getHeadRadius() {
+		return this.bodies[0].radius;
+	}
+
+	reset(x: number, y: number) {
+		this.pos(x, y);
+		this.angle = 0;
+
+		this.angle = _2PI * 3 / 4;
+		this.targetAngle = this.angle;
+		this.angleVelocity = ANGLE_VELOCITY;
+
+		this.calcVelocity();
+
+		while (this.bodies.length > INIT_LENGTH) {
+			let body = this.bodies.pop();
+			Laya.Pool.recover(BODY_POOL_SIGN, body);
+		}
+		for (let i = 0; i < this.bodies.length; ++i) {
+			let body = this.bodies[i];
+			body.pos(x, y);
+			body.reset();
+		}
+	}
 }
 
-const MAX_HISTORY = 10;
+const MAX_HISTORY = 8;
 
 class Body extends Laya.Sprite {
 	
 	historyPos: Laya.Point[] = [];
 	historyPosIdx: number = -1;
+	readonly radius: number = 15;
 
 	constructor() {
 		super();
 
-		this.graphics.drawCircle(0, 0, 15, "#0000FF");
+		this.graphics.drawCircle(0, 0, this.radius, "#0000FF");
 	}
 
 
@@ -121,7 +153,7 @@ class Body extends Laya.Sprite {
 		let lp = p.getLastPoint();
 		if (lp) {
 			if (this.historyPos.length < MAX_HISTORY) {
-				let point:Laya.Point = Laya.Pool.getItemByClass("point", Laya.Point);
+				let point:Laya.Point = Laya.Pool.getItemByClass(POINT_POOL_SIGN, Laya.Point);
 				this.historyPos.push(point.setTo(lp.x, lp.y));
 				this.historyPosIdx = this.historyPos.length;
 				if (this.historyPosIdx == MAX_HISTORY)
@@ -146,6 +178,14 @@ class Body extends Laya.Sprite {
 		}
 				
 		return this.historyPos[this.historyPosIdx];
+	}
+
+	reset() {
+		while (this.historyPos.length > 0) {
+			let point = this.historyPos.pop();
+			Laya.Pool.recover(POINT_POOL_SIGN, point);
+		}
+		this.historyPosIdx = -1;
 	}
 }
 

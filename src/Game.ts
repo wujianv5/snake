@@ -11,6 +11,8 @@ export class GameMain {
         Laya.stage.scaleMode="fixedwidth";
         Laya.stage.screenMode = "vertical"
         Laya.stage.on(Laya.Event.RESIZE, this, this.onResize);
+
+        Laya.Stat.show(0,0);
     }
 
     onResize() {
