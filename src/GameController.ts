@@ -98,7 +98,7 @@ export class GameController {
 
 					let body = hero.newBody();
 					hero.addBody(body);
-					break;
+					continue;
 				}
 			}
 			++i;

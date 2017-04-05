@@ -53,10 +53,12 @@ export class Snake extends Laya.Sprite {
 	}
 
 	addBody(body: Body) {
-		body.zOrder = this.baseZ -this.bodies.length;
+		body.zOrder = this.baseZ - this.bodies.length;
 		if (this.bodies.length > 0) {
 			let last = this.bodies[this.bodies.length - 1];
-			body.pos(last.x, last.y);
+			let lp = last.getLastPos();
+			body.pos(lp.x, lp.y, true);
+			body.rotation = lp.r;
 		}
 		this.bodies.push(body);
 		this.gameScene.playGround.addChild(body);
@@ -122,7 +124,7 @@ export class Snake extends Laya.Sprite {
 	}
 
 	reset(x: number, y: number) {
-		this.pos(x, y);
+		this.pos(x, y, true);
 		this.angle = 0;
 
 		this.angle = _2PI * 3 / 4;
@@ -139,7 +141,7 @@ export class Snake extends Laya.Sprite {
 		}
 		for (let i = 0; i < this.bodies.length; ++i) {
 			let body = this.bodies[i];
-			body.pos(x, y);
+			body.pos(x, y, true);
 			body.reset();
 		}
 	}
