@@ -56,7 +56,9 @@ var com;
                 body.zOrder = this.baseZ - this.bodies.length;
                 if (this.bodies.length > 0) {
                     var last = this.bodies[this.bodies.length - 1];
-                    body.pos(last.x, last.y);
+                    var lp = last.getLastPos();
+                    body.pos(lp.x, lp.y, true);
+                    body.rotation = lp.r;
                 }
                 this.bodies.push(body);
                 this.gameScene.playGround.addChild(body);
@@ -113,7 +115,7 @@ var com;
                 return this.bodies[0].radius;
             };
             Snake.prototype.reset = function (x, y) {
-                this.pos(x, y);
+                this.pos(x, y, true);
                 this.angle = 0;
                 this.angle = _2PI * 3 / 4;
                 this.targetAngle = this.angle;
@@ -122,12 +124,13 @@ var com;
                 this.calcVelocity();
                 while (this.bodies.length > INIT_LENGTH) {
                     var body = this.bodies.pop();
-                    Laya.Pool.recover(BODY_POOL_SIGN, body);
+                    body.reset();
                     body.removeSelf();
+                    Laya.Pool.recover(BODY_POOL_SIGN, body);
                 }
                 for (var i = 0; i < this.bodies.length; ++i) {
                     var body = this.bodies[i];
-                    body.pos(x, y);
+                    body.pos(x, y, true);
                     body.reset();
                 }
             };

@@ -74,7 +74,7 @@ var com;
                             Laya.Pool.recover(FOOD_POOL_SIGN, food);
                             var body = hero.newBody();
                             hero.addBody(body);
-                            break;
+                            continue;
                         }
                     }
                     ++i;
