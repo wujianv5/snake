@@ -1,5 +1,5 @@
 /**
-* name 
+* name
 */
 module com.test {
 
@@ -136,8 +136,9 @@ export class Snake extends Laya.Sprite {
 
 		while (this.bodies.length > INIT_LENGTH) {
 			let body = this.bodies.pop();
-			Laya.Pool.recover(BODY_POOL_SIGN, body);
+			body.reset();
 			body.removeSelf();
+			Laya.Pool.recover(BODY_POOL_SIGN, body);
 		}
 		for (let i = 0; i < this.bodies.length; ++i) {
 			let body = this.bodies[i];
@@ -162,7 +163,7 @@ class HistoryPos {
 }
 
 class Body extends Laya.Sprite {
-	
+
 	historyPos: HistoryPos[] = [];
 	historyPosIdx: number = -1;
 	protected _radius: number = 15;
@@ -170,7 +171,7 @@ class Body extends Laya.Sprite {
 	constructor() {
 		super();
 
-		this.setupLooking();		
+		this.setupLooking();
 	}
 
 	get radius(): number {
@@ -182,7 +183,7 @@ class Body extends Laya.Sprite {
 		this.size(texture.width, texture.height);
 		this.graphics.drawTexture(texture, -texture.width / 2, -texture.height / 2, texture.width, texture.height, SNAKE_TEXTURE_MATRIX);
 		this._radius = Math.min(texture.width, texture.height) / 2;
-		
+
 	}
 
 	updatePos(p: {getLastPos():HistoryPos}) {
@@ -213,7 +214,7 @@ class Body extends Laya.Sprite {
 		if (this.historyPos.length < MAX_HISTORY) {
 			return this.historyPos[0];
 		}
-				
+
 		return this.historyPos[this.historyPosIdx];
 	}
 
@@ -235,7 +236,7 @@ class Head extends Body {
 	setupLooking() {
 		let texture: Laya.Texture = Laya.Loader.getRes("game/skin_1_head.png");
 		this.size(texture.width, texture.height);
-		
+
 		this.graphics.drawTexture(texture, -texture.width / 2, -texture.height / 2, texture.width, texture.height, SNAKE_TEXTURE_MATRIX);
 		this._radius = Math.min(texture.width, texture.height) / 2;
 	}
