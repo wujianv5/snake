@@ -16,13 +16,11 @@ var com;
                 if (!this.inited) {
                     this.inited = true;
                     Laya.stage.bgColor = "#EEEEEE";
+                    console.log("start load resources");
                     Laya.loader.load("res/atlas/game.json", Laya.Handler.create(this, this.onLoaded), null, Laya.Loader.ATLAS);
                 }
             };
             GameMain.prototype.onLoaded = function () {
-                console.log(Laya.Loader.loadedMap);
-                for (var i in Laya.Loader.loadedMap)
-                    console.log(i + " -> " + Laya.Loader.loadedMap[i]);
                 this.initGameScene();
             };
             GameMain.prototype.initGameScene = function () {

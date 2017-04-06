@@ -34,15 +34,17 @@ export class Snake extends Laya.Sprite {
 	constructor(scene: GameScene, baseZ: number, x: number, y: number) {
 		super();
 
+		console.log("new snake at [" + x + ", " + y + "]");
+
 		this.gameScene = scene;
 		this.baseZ = baseZ;
+
+		this.reset(x, y);
 
 		this.addBody(Laya.Pool.getItemByClass(HEAD_POOL_SIGN, Head));
 		for (let i = 0; i < INIT_LENGTH - 1; ++i) {
 			this.addBody(this.newBody());
 		}
-
-		this.reset(x, y);
 
 		this.frameLoop(1, this, this.update);
 		this.on("change_dir", this, this.onDirChanged);
@@ -57,6 +59,7 @@ export class Snake extends Laya.Sprite {
 		if (this.bodies.length > 0) {
 			let last = this.bodies[this.bodies.length - 1];
 			let lp = last.getLastPos();
+			console.log("-->>>>> " + lp);
 			body.pos(lp.x, lp.y, true);
 			body.rotation = lp.r;
 		}
@@ -183,7 +186,6 @@ class Body extends Laya.Sprite {
 		this.size(texture.width, texture.height);
 		this.graphics.drawTexture(texture, -texture.width / 2, -texture.height / 2, texture.width, texture.height, SNAKE_TEXTURE_MATRIX);
 		this._radius = Math.min(texture.width, texture.height) / 2;
-
 	}
 
 	updatePos(p: {getLastPos():HistoryPos}) {
@@ -209,7 +211,7 @@ class Body extends Laya.Sprite {
 
 	getLastPos(): HistoryPos {
 		if (this.historyPos.length == 0)
-			return null;
+			return new HistoryPos().set(this.x, this.y, this.rotation);
 
 		if (this.historyPos.length < MAX_HISTORY) {
 			return this.historyPos[0];

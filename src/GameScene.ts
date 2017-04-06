@@ -1,5 +1,5 @@
 /**
-* name 
+* name
 */
 module com.test {
 
@@ -19,9 +19,11 @@ export class GameScene extends Laya.Sprite {
 	constructor() {
 		super();
 
+        console.log("game scene init start");
+
         let stageWidth = Laya.stage.width;
         let stageHeight = Laya.stage.height;
-		
+
 		this.hitArea = new Laya.Rectangle(-stageWidth, -stageHeight, stageWidth * 3, stageHeight * 3);
 
         let rootSprite = new Laya.Sprite();
@@ -50,6 +52,8 @@ export class GameScene extends Laya.Sprite {
 
 		this.on(Laya.Event.MOUSE_MOVE, this.inputController, this.inputController.onTouchMove);
         this.on(Laya.Event.MOUSE_UP, this.inputController, this.inputController.onTouchUp);
+
+        console.log("game scene init ok");
 	}
 }
 

@@ -23,6 +23,7 @@ var com;
                 var _this = _super.call(this) || this;
                 _this.groundWidth = 2000;
                 _this.groundHeight = 2000;
+                console.log("game scene init start");
                 var stageWidth = Laya.stage.width;
                 var stageHeight = Laya.stage.height;
                 _this.hitArea = new Laya.Rectangle(-stageWidth, -stageHeight, stageWidth * 3, stageHeight * 3);
@@ -45,6 +46,7 @@ var com;
                 _this.frameLoop(1, _this.gameController, _this.gameController.update);
                 _this.on(Laya.Event.MOUSE_MOVE, _this.inputController, _this.inputController.onTouchMove);
                 _this.on(Laya.Event.MOUSE_UP, _this.inputController, _this.inputController.onTouchUp);
+                console.log("game scene init ok");
                 return _this;
             }
             return GameScene;

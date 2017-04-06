@@ -38,13 +38,14 @@ var com;
                 _this.angleDegrees = _this.angle * 180 / _PI;
                 _this.bodies = [];
                 _this.lastPos = new HistoryPos();
+                console.log("new snake at [" + x + ", " + y + "]");
                 _this.gameScene = scene;
                 _this.baseZ = baseZ;
+                _this.reset(x, y);
                 _this.addBody(Laya.Pool.getItemByClass(HEAD_POOL_SIGN, Head));
                 for (var i = 0; i < INIT_LENGTH - 1; ++i) {
                     _this.addBody(_this.newBody());
                 }
-                _this.reset(x, y);
                 _this.frameLoop(1, _this, _this.update);
                 _this.on("change_dir", _this, _this.onDirChanged);
                 return _this;
@@ -57,6 +58,7 @@ var com;
                 if (this.bodies.length > 0) {
                     var last = this.bodies[this.bodies.length - 1];
                     var lp = last.getLastPos();
+                    console.log("-->>>>> " + lp);
                     body.pos(lp.x, lp.y, true);
                     body.rotation = lp.r;
                 }
@@ -194,7 +196,7 @@ var com;
             };
             Body.prototype.getLastPos = function () {
                 if (this.historyPos.length == 0)
-                    return null;
+                    return new HistoryPos().set(this.x, this.y, this.rotation);
                 if (this.historyPos.length < MAX_HISTORY) {
                     return this.historyPos[0];
                 }

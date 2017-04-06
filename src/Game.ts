@@ -3,7 +3,7 @@
 module com.test {
 
 export class GameMain {
-    
+
     inited: boolean = false;
 
     constructor() {
@@ -19,14 +19,12 @@ export class GameMain {
         if (!this.inited) {
             this.inited = true;
             Laya.stage.bgColor = "#EEEEEE";
+            console.log("start load resources");
             Laya.loader.load("res/atlas/game.json", Laya.Handler.create(this, this.onLoaded), null, Laya.Loader.ATLAS)
         }
     }
 
     onLoaded() {
-        console.log(Laya.Loader.loadedMap);
-        for (var i in Laya.Loader.loadedMap) 
-            console.log(i + " -> " + Laya.Loader.loadedMap[i]);
         this.initGameScene();
     }
 
